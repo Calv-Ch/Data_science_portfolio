@@ -17,4 +17,4 @@ _Note: Data used in the projects (accessed under data directory) is for demonstr
 
 - ### Full project
       - __Python, SPSS modeler__
-          - [Building a successful bank marketing campaign](Work in progress): Data anaylsis and machine learning using Classification decision tree and random forest to predict whether a client will subscribe to term deposit.
+          - [Building a successful bank marketing campaign](Work in progress): Data analysis and machine learning using Classification decision tree and random forest to predict whether a client will subscribe to term deposit.
