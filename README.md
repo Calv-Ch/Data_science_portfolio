@@ -10,3 +10,11 @@ _Note: Data used in the projects (accessed under data directory) is for demonstr
 ## Contents
 
 - ### Machine learning 
+
+- ### Data Analysis and visualisation
+
+- ### Micro project
+
+- ### Full project
+      - __Python, SPSS modeler__
+          - [Building a successful bank marketing campaign](Work in progress): Data anaylsis and machine learning using Classification decision tree and random forest to predict whether a client will subscribe to term deposit.
