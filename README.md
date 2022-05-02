@@ -21,9 +21,11 @@ _Note: Data used in the projects (accessed under data directory) is for demonstr
    - [SPH Performance analysis 2008 - 2020](https://rpubs.com/Calvin_C/897375): Comparing the performance of the SPH old leadership team against the current team to determine whether the company have improved or declined under the current leadership (Time series, path plots)
    - [Analysis on unlicensed moneylending and harassment trend in Singapore](https://rpubs.com/Calvin_C/897583): Using REST API & httr:GET, we retrieve data from data.gov.sg to analyse unlicensed moneylending and harassment trend in Singapore. (line plots, path plots and spatial viz)
        - [Dashboard for unlicensed moneylending and harassment trend in Singaporel](https://calvin-c.shinyapps.io/Moneylending_harassment_in_Singapore): Simple interactive dashboard that shows the number of activities occured for the selected year with spatial representation.
-   - [How bad is the aging population rate of Singapore?](https://rpubs.com/Calvin_C/897639): Using demographics dataset from data.gov.sg, we will be exploring answers to questions like which ethnic group has the biggest influence in aging population and whether is there a gender preference in Singapore. 
+   
 
 - ### Micro project:
+  __R, Rmarkdown, gganimate__
+  - [How bad is the aging population rate of Singapore?](https://rpubs.com/Calvin_C/897639): Using demographics dataset from data.gov.sg, we will be exploring answers to questions like which ethnic group has the biggest influence in aging population and whether is there a gender preference in Singapore. (line plot, gganimated plots, time series)
 
 - ### Full project:
 
