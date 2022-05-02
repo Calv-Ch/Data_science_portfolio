@@ -15,12 +15,12 @@ _Note: Data used in the projects (accessed under data directory) is for demonstr
    - [Linear Regression: Enhance website or mobile app?](https://github.com/Calv-Ch/Data_science_portfolio/blob/main/ML%20-%20Linear%20Regression%20on%20Ecommerce%20data.ipynb): Using linear regression model to decide which platform (mobile vs website) an ecommerce store should focus on to maximise revenue.
 
 - ### Data Analysis and visualization:
-   __R, Rmarkdown__
+   __R, Rmarkdown, Flex dashboard__
    
    - [Analysis of Chinese Dialect Distribution](https://rpubs.com/Calvin_C/897027): Cleaning and analysing Singapore's chinese dialect group and see whether has there been any changes in its make up between different age groups. (multi bar plots)
    - [SPH Performance analysis 2008 - 2020](https://rpubs.com/Calvin_C/897375): Comparing the performance of the SPH old leadership team against the current team to determine whether the company have improved or declined under the current leadership (Time series, path plots)
    - [Analysis on unlicensed moneylending and harassment trend in Singapore](https://rpubs.com/Calvin_C/897583): Using REST API & httr:GET, we retrieve data from data.gov.sg to analyse unlicensed moneylending and harassment trend in Singapore. (line plots, path plots and spatial viz)
-       - [Dashboard for unlicensed moneylending and harassment trend in Singaporel](https://calvin-c.shinyapps.io/Moneylending_harassment_in_Singapore): Simple nterative dashboard that shows the number of activities occured for the selected year with spatial representation.
+       - [Dashboard for unlicensed moneylending and harassment trend in Singaporel](https://calvin-c.shinyapps.io/Moneylending_harassment_in_Singapore): Simple interactive dashboard that shows the number of activities occured for the selected year with spatial representation.
 
 - ### Micro project:
 
