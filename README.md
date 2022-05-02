@@ -18,6 +18,7 @@ _Note: Data used in the projects (accessed under data directory) is for demonstr
    __R__
    
    - [Analysis of Chinese Dialect Distribution](https://rpubs.com/Calvin_C/897027): Cleaning and analysing Singapore's chinese dialect group and see whether has there been any changes in its make up between different age groups.
+   - [SPH Performance analysis 2008 - 2020](https://rpubs.com/Calvin_C/897375): Comparing the performance of the SPH old leadership team against the current team to determine whether the company have improved or declined under the current leadership
 
 - ### Micro project:
 
