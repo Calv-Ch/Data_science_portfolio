@@ -19,6 +19,7 @@ _Note: Data used in the projects (accessed under data directory) is for demonstr
    
    - [Analysis of Chinese Dialect Distribution](https://rpubs.com/Calvin_C/897027): Cleaning and analysing Singapore's chinese dialect group and see whether has there been any changes in its make up between different age groups.
    - [SPH Performance analysis 2008 - 2020](https://rpubs.com/Calvin_C/897375): Comparing the performance of the SPH old leadership team against the current team to determine whether the company have improved or declined under the current leadership
+   - [Analysis on unlicensed moneylending and harassment trend in Singapore](https://rpubs.com/Calvin_C/897583): Using REST API & httr:GET, we retrieve data from data.gov.sg to analyse unlicensed moneylending and harassment trend in Singapore
 
 - ### Micro project:
 
