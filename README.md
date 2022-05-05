@@ -14,7 +14,7 @@ _Note: Data used in the projects (accessed under data directory) is for demonstr
    
    - [Linear Regression: Enhance website or mobile app?](https://github.com/Calv-Ch/Data_science_portfolio/blob/main/ML%20-%20Linear%20Regression%20on%20Ecommerce%20data.ipynb): Using linear regression model to decide which platform (mobile vs website) an ecommerce store should focus on to maximise revenue.
    - [Logistic Regression: Predicting whether visitor will click on Ad](https://github.com/Calv-Ch/Data_science_portfolio/blob/main/ML%20-%20Logistic%20Regression%20Advertising.ipynb): Using logistic regression model to predict whether the site visitor will click on an Ad.
-   - [K Nearest Neighbour: On unlabelled dataset](https://github.com/Calv-Ch/Data_science_portfolio/blob/main/ML%20-%20K%20Nearest%20Neighbour.ipynb): Finding patterns in unlabelled dataset using K Means clustering.
+   - [K Nearest Neighbour: On unlabelled dataset](https://github.com/Calv-Ch/Data_science_portfolio/blob/main/ML%20-%20K%20Nearest%20Neighbour.ipynb): With hidden column names, we use KNN to create a model that predicts the target class based on the available features.
 
 - ### Data Analysis and visualization:
    __R, Rmarkdown, Flex dashboard__
