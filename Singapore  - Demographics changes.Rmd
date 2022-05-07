@@ -1,0 +1,194 @@
+---
+title: "Data exploration of Singapore's demographic changes"
+output:
+  html_document:
+    df_print: paged
+---
+**Done by Calvin C** 
+
+**- Sep 2021 ** 
+
+Introduction
+
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "C:/Users/Calvin C/Desktop/Coding/3. Data Analytics SUSS/ANL501 - Visualisation/TMA_501")
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup
+```{r warning = FALSE, message = FALSE} 
+library(tidyverse)
+library(directlabels)
+library(pkgbuild)
+library(gifski)
+library(gganimate)
+library(png)
+theme_set(theme_light())
+```
+
+Reading the demographics data
+```{r warning = FALSE, message = FALSE} 
+df1 <- read.csv("tma_demographics.csv")
+head(df1)
+``` 
+Checking out the structure of data
+
+```{r warning = FALSE, message = FALSE} 
+str(df1)
+
+``` 
+Reorganizing the data by creating two new columns, ethnicity and gender and dropping aggregated data.
+
+```{r warning = FALSE, message = FALSE}
+df2<- df1%>%
+  mutate(level_1 = gsub("Total ", '',df1$level_1))%>%
+  filter(level_1 == 'Male Malays'|level_1 == "Female Malays"|
+         level_1 == "Male Chinese"|level_1 == "Female Chinese"|
+         level_1 == "Male Indians"|level_1 == "Female Indians"|
+         level_1 == "Other Ethnic Groups (Males)"|level_1 == "Other Ethnic Groups (Females)")%>%
+  mutate(level_1 = gsub("Other Ethnic Groups \\(Males\\)", 'Male Others', level_1))%>%
+  mutate(level_1 = gsub("Other Ethnic Groups \\(Females\\)", 'Female Others', level_1)) %>%
+  separate(level_1, into = c("Gender","Ethnicity"), sep = " ")%>%
+  mutate(value = gsub("na", 0, value))
+
+
+names(df2)[4]<- paste("age_band")
+names(df2)[5]<- paste("population_size")
+
+df2$population_size <- as.integer(df2$population_size) 
+
+head(df2)
+
+``` 
+
+### A dive into Singapore's fertility rate
+
+In a recent newspaper article in February 21, it was reported that Singapore's Fertility rate fell to a historic low of 1.1 and some of the contributing factors include COVID-19 and rising property prices that delayed marriages and parenthood plans.  A falling birth rate together along with a higher life expectancy is increasing the rate that the population is aging. 
+In this study, we will be using the above dataset from data.gov.sg to analyse the population changes in Singapore throughout the years and which ethnic group has the biggest influence in the aging population rate. To begin, we will be categorizing the age bands to 3 categories based on national statistical standards:
+
+Formative years – Youth age 19 and below
+Working years – Adults between age 20 to 64
+Retirement years – Adult's age 65 and above
+
+```{r warning = FALSE, message = FALSE} 
+
+# Converting age bank to life stages
+df3<- df2%>%
+  mutate(life_stage = (if_else(
+    age_band == "0  -  4 Years"|age_band == "5  -  9 Years"|
+      age_band =="10 - 14 Years"|age_band =="15 - 19 Years", " formative_years - 0 to 19", if_else(
+        age_band =="20 - 24 Years"|age_band =="25 - 29 Years"|
+          age_band =="30 - 34 Years"|age_band =="35 - 39 Years"|
+          age_band =="40 - 44 Years"|age_band =="45 - 49 Years"|
+          age_band =="50 - 54 Years"|age_band =="55 - 59 Years"|
+          age_band =="60 - 64 Years", " working_years - 20 to 64",if_else(
+            age_band =="65 - 69 Years"|age_band =="70 - 74 Years"|
+              age_band =="75 - 79 Years"|age_band =="80 - 84 Years"|
+              age_band =="85 - 89 Years"|age_band == "90 Years & Over", "retirement_years - 65 and above",NULL
+          ))))) %>%
+  na.omit()
+#population size by life_stage
+df4 <- aggregate(population_size~year+life_stage, df3,sum) 
+head(df4)
+``` 
+
+Creating the plot
+
+```{r warning = FALSE, message = FALSE} 
+
+p.1a <- ggplot(data= df4, mapping = aes(x = year, y = population_size, group= life_stage))
+p1a.anim<- p.1a + geom_line(aes(color = life_stage))+
+  scale_y_log10(labels = scales::label_comma())+
+  geom_dl(aes(label = life_stage, color = life_stage),method =("first.points"),size =16)+
+  labs(y = "Population size", 
+       x=" Year", 
+       title = "Population size by life stages"
+  )+
+  guides(color= 'none')+
+  theme_light()+
+  transition_reveal(year)
+
+animate(p1a.anim, fps=12,renderer = gifski_renderer())
+# anim_save("Population size by life stages.gif", animation = p1a.anim)
+
+# p.1a <- ggplot(data= df4, mapping = aes(x = year, y = population_size, group= life_stage))
+# p.1a + geom_line(aes(color = life_stage))+
+#   scale_y_log10(labels = scales::label_comma())+
+#   geom_dl(aes(label = life_stage, color = life_stage),method =("smart.grid"),size =16)+
+#   labs(y = "Population size",
+#        x=" Year",
+#        title = "Population size by life stages"
+#        )+
+#   guides(color= FALSE) +
+#   theme_light()
+
+``` 
+
+From the above, we can see that population size for retirement years have increased by more than 10 times in the last 50 years, from less than 30,000 in 1957 to more than 300,000 by 2019, this is in contrast with the population size for youth which has been hovering around the 1,000,000 mark and has been slowly decreasing. 
+
+```{r warning = FALSE, message = FALSE} 
+#population size growth of each Ethnicity split by life stage
+df3a<- aggregate(population_size~year+Ethnicity+life_stage, df3, sum)
+
+p.1b <- ggplot(data=df3a, mapping = aes(x=year, y=population_size, fill=Ethnicity))
+p.1b + geom_line(aes(color =Ethnicity))+
+  scale_y_log10(labels=scales::label_comma())+
+  facet_wrap("~life_stage")+
+  geom_dl(aes(label = Ethnicity, color = Ethnicity),method =("smart.grid"),size =16)+
+  geom_smooth(method=lm, se=F, aes(color = Ethnicity),show.legend = F)+
+  guides(color = "none")+
+  labs(y = "Population Size", 
+       x=" Year", 
+       title = "Population size changes of each Ethnicity split by life stage")+
+  theme_light()
+``` 
+
+Looking into the different Ethnicity in Singapore, we can see that Chinese holds the highest proportion of population in Singapore. Under formative years, the Chinese ethnic group has a decreasing trend compared to the others which currently still holds an increasing trend. 
+
+Lastly, we will be looking at the dependency ratio which is defined as the number of dependents per working adult. We will be looking at two dependent groups, mainly children and youth below age 20 and adults age 65 and above.
+
+Formula for dependency ratio per 100 adults for formative years is: 
+(Formative years population/ working years population)*100
+
+Formula for dependency ratio per 100 adults for Retirement years is: 
+(Retirement years population/ working years population)*100
+
+```{r warning = FALSE, message = FALSE} 
+#Dependency ratio of each ethnicity splot
+df3b <- df3a %>%
+  pivot_wider(names_from = life_stage, values_from = population_size)%>%
+  mutate(Formative = .[[3]]*100/.[[4]])%>%
+  mutate(Retirement = .[[5]]*100/.[[4]])
+
+df3b <-df3b %>%
+  pivot_longer(cols = 6:7, names_to = "dep_ratio_type", values_to = "dep_ratio")%>%
+  select(year,Ethnicity,dep_ratio_type,dep_ratio)
+head(df3b)
+```
+
+```{r warning = FALSE, message = FALSE} 
+
+p.1c <- ggplot(data=df3b, mapping = aes(x=year, y=dep_ratio))
+p.1c + geom_point(aes(color =dep_ratio_type, shape = Ethnicity))+
+  labs(y = "Dependency Ratio per 100 working adults", 
+       x=" Year", 
+       title = "Dependency Ratio of retirees & children split by ethnicity",
+       color = "Dependency Ratio type")+
+  theme_light()
+
+``` 
+
+We can see that across all Ethnic group, there is a general increase in the dependency ratio for retirement years which means that population size for retirement years has been growing much quicker than the population size of working adults. On the other hand, dependency ratio for formative years has dropped sharply since its peak before 1970s. 
+
+Comparing the changes across all the ethnic groups, the Chinese Ethnic group, represented by the circle shape, has the sharpest rise in the retirement years dependency ratio and the sharpest drop in the formative years' dependency ratio.
+
+In Conclusion, the growth of population in the retirement years is rising much faster than the growth of population of working adults while the population of youth below age 20 is decreasing. Among the 4 Ethnic groups, Chinese is the majority ethnic group and has the greatest influence in the increasing rate of aging population in Singapore due to their rapid increase of dependency ratio for retirements years and rapid decrease of dependency ratio for formative years.
+
+
+
+
+
+
+
+
