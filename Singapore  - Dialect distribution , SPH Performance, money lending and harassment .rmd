@@ -1,0 +1,382 @@
+---
+title: "ECA ANL501"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(ggthemes)
+theme_set(theme_light())
+
+knitr::opts_knit$set(root.dir = "C:/Users/Calvin C/Desktop/Coding/3. Data Analytics SUSS/ANL501 - Visualisation/ECA_501")
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1(a)
+```{r warning = FALSE, message = FALSE, echo=FALSE} 
+
+eca.1 <- read.csv("eca_dialect.csv")
+eca.1a <- eca.1 %>% 
+  filter(Gender== "Total")%>% 
+  mutate(age_group = (if_else(
+    Age == "   0 - 4"|Age == "   5 - 9"|
+      Age ==" 10 - 14"|Age ==" 15 - 19", " Age: 0 - 19", if_else(
+        Age ==" 20 - 24"|Age ==" 25 - 29"|
+          Age ==" 30 - 34"|Age ==" 35 - 39", "Age: 20 - 39",if_else(
+          Age ==" 40 - 44"|Age ==" 45 - 49"|
+          Age ==" 50 - 54"|Age ==" 55 - 59", "Age: 40 - 59", if_else(
+          Age ==" 60 - 64"|
+            Age ==" 65 - 69"|Age ==" 70 - 74", "Age: 60 - 74",NULL
+          ))))))
+
+eca.1b<-aggregate(Freq~Dialect + age_group,eca.1a,sum)
+eca.1c<-group_by(eca.1b,age_group)%>%
+  mutate(pct = round(Freq*100/sum(Freq)))
+
+p.1a <- ggplot(eca.1c, aes(x=reorder(Dialect, pct), y = pct, fill = Dialect))
+p.1a + geom_col(position = "dodge2")+
+  facet_grid(~age_group)+
+  labs(x = NULL, 
+       y = "Percent %", 
+       fill = "Dialect", 
+       title = "Distribution of dialect group against age group")+
+  geom_text(aes(label = pct), size = 3, position = position_stack(vjust = 0.5))+
+  guides(fill= "none")+
+  coord_flip()
+
+``` 
+
+From the plot, we can see that the distribution of dialects across the different age group is largely consistent.    
+
+The top three dialect groups, Hokkien, Teochew and Cantonese remains the majority across all age group and takes up at least 70% of the population in each age group. However, their proportion has been decreasing as the age group gets younger, from 78% at the highest age group, to only 71% at the lowest age group.  
+
+There is also a rise of dialect group categorize under, Other Chinese, that has been experiencing increasing proportion as the age group gets younger. This group makes up only 1% of the oldest age group but makes up 12% at the youngest age group and is only 1 percentage point lower than the 3rd biggest dialect group, Cantonese, at 13%.  
+
+As the context and source of the dataset is not shared, the dataset is likely a snapshot of the distribution of dialect groups of Chinese across different age groups in a particular country. From the above observations, we can conclude that the country's diversity of dialect groups is increasing and there might be a possibility that a new dialect group might emerge to be included in the top 9 dialects of the country in the years to come.
+
+
+---------------
+
+## Question 1(b)
+
+Data Pre-Processing and constructing a new dataframe consisting of company's profit and share price from 2008 to 2020.
+
+```{r warning = FALSE, message = FALSE} 
+
+#Preparing data for profit against year
+eca.2 <- read.csv("eca_sph_profit.csv")
+eca.2a<- eca.2 %>% 
+  mutate(profit = gsub(",", "",eca.2$Profit))
+
+#Assign data type and choosing only data required
+eca.2a$profit <- as.integer(eca.2a$profit)
+eca.2b <- select(eca.2a, Year, profit)
+
+#Preparing data for Share price against year
+eca.3 <- read.csv("eca_sph_share.csv")
+eca.3a <- eca.3 %>%
+  mutate(Year = str_sub(Date,-4,-1))
+
+#Assign data type and choosing only data required
+eca.3a$Year <- as.integer(eca.3a$Year)
+eca.3b<- select(eca.3a, Year, Close)
+
+#Create single dataframe consisting of profit and share price for 2008 to 2020
+sph_perf <- left_join(eca.2b, eca.3b)
+
+#Update column names
+names(sph_perf)[2] <- paste("Profit_after_taxation")
+names(sph_perf)[3] <- paste("closing_share_price")
+
+#As the new CEO joins after share price of 2017 has closed, he will start from 2018
+sph_perf <- sph_perf %>%
+  mutate(new_ceo = (if_else(Year>= 2018, 'yes','no')))
+
+#show the dataframe consisting of profit after tax and closing share price for year 2008 to 2020.
+
+head(sph_perf)
+```
+
+
+### Visualisation 1
+```{r warning = FALSE, message = FALSE, echo = FALSE} 
+
+p.2 <- ggplot(data = sph_perf,  mapping = aes(x = Year, y= Profit_after_taxation/1000))
+p.2 + geom_line() +
+  scale_x_continuous(breaks = seq(2008,2020,2))+
+  geom_vline(xintercept = 2018, color = "red")+
+  geom_hline(yintercept = 0, color = "red")+
+  geom_line(color = "gray60", size =1)+
+  annotate("text", x = 2018, y = 200, label = " New CEO joins", size = 5)+
+  labs(y = "S$'m", 
+       x = NULL,
+       title = "Singapore Press holdings (SPH) Profit, 2008 - 2020")
+  
+``` 
+
+For this study we would like to look at the performance of SPH leadership team.  
+
+Before the new CEO joins, the performance of the SPH leadership has been pretty consistent with the worst performance reported at above S$300 million profit in 2016 and the best performance reported just below S$600 million profit in 2012. On 2017, before the handover, the profit for the company stands at just below S$400 million.
+
+After the appointment of the new CEO on 1 September 2017, it is observed that for his first year, he was not able to exceed or maintain the profit level when he took over, ending the year at just above S$300 million, and close to SPH's worst performing year in the last 10 years.
+
+After his first year, the performance of SPH continues to decline,reporting a profit of below S$300 million for the first time in 2019 and subsequently dives to a loss in 2020.
+
+### Visualisation 2
+
+
+```{r warning = FALSE, message = FALSE, echo = FALSE} 
+
+p.3 <- ggplot(data = sph_perf,  mapping = aes(x = closing_share_price, y= Profit_after_taxation/1000))
+
+p.3 + geom_path(color = "gray80") +
+  geom_text(aes(color = new_ceo, label = Year), size = 3, fontface="bold")+
+  theme(legend.position = "bottom")+
+  labs(color = " New CEO joins",
+       x = "Share price (S$)", 
+       y = "Profit (S$'m)",
+       title = "SPH Profits vs Share price, 2008 - 2020"
+  ) +
+  scale_y_continuous(labels = scales :: dollar,)+
+  scale_x_continuous(labels = scales :: dollar)+
+  geom_hline(yintercept = 0, color = "red")
+
+``` 
+
+
+The graph seems to suggests that the new CEO was appointed after the share price has fallen from above S$3.50 before 2016 to below S$3.00 in 2017 and after the previous CEO managed to recover the profit level above the performance of 2015.   
+
+At the end of the new CEO first year, share price has crept back up slightly while profit continue to decline. After 2018, the decline of profit level continues and share price of SPH starts to decline as well. In 2020, both the profit level and share price starts to plummet resulting in its worst performance since 2008.  
+
+To conclude, the SPH leadership led by the new CEO performed poorly compared to its predecessors as they were unable to bring the organisation back to the profit level and share price under the previous SPH leadership and instead accelerates its decline.
+
+
+-------------------------------
+
+## Question 2(a)
+
+
+```{r warning = FALSE, message = FALSE, echo = F} 
+#Activate libraries required for this question
+library(datagovsgR)
+library(httr)
+library(jsonlite)
+
+``` 
+
+Contruct dataset consisting the number of Moneylending and harassments activities by locations over time
+
+```{r warning = FALSE, message = FALSE} 
+
+# Extracting data using REST API & httr::GET, limit at 1000 as total is 960 to obtain all data
+raw_data <- httr::GET("https://data.gov.sg/api/action/datastore_search?resource_id=c8f71283-c5b2-43ca-80d3-f08bea210ebc&limit=1000")
+
+# Clean the data
+data_content <- httr::content(raw_data, as = "text")
+data_content_parse <- jsonlite::fromJSON(data_content)
+
+data_mh<- as_tibble(data_content_parse$result$records)
+
+# Turns 'na' and '-' to 0 and separate level_1 into location and sub location
+data_mh1<- data_mh %>%
+  mutate(value = gsub("na", "0", gsub("-", "0", data_mh$value))) %>%
+  separate(level_1, into = c('location', 'sub-location'), sep = " - ")
+
+# Remove repeating term 'Police division' from table
+data_mh1 <- data_mh1 %>%
+  mutate(location = gsub(' Police Division', '', data_mh1$location))
+
+# change data type to integer
+data_mh1$value <- as.integer(data_mh1$value) 
+data_mh1$year <- as.integer(data_mh1$year)
+
+# change column name to activity
+names(data_mh1)[5]<- paste("activity")
+
+#select only the final variables required in the dataset
+data_mh2 <- select(data_mh1, year, location, `sub-location`, activity, value)
+head(data_mh2)
+
+``` 
+
+
+-------------------
+
+## Question 2(b)
+
+```{r warning = FALSE, message = FALSE, echo = FALSE} 
+data_mh3 <- data_mh2 %>% filter(`sub-location` == 'Total')
+data_mh3a <- aggregate(value~year+activity, data_mh3, sum)
+data_mh3a <- pivot_wider(data_mh3a, names_from = activity, values_from = value)
+
+p.4 <- ggplot(data = data_mh3a,mapping = aes(x = Harassment, y= `Unlicensed Moneylending`))
+p.4 + geom_path(color = "gray80") +
+  geom_text(aes(label = year), size = 3, fontface="bold")+
+  scale_y_continuous(labels = scales::label_comma())+
+  scale_x_continuous(labels = scales::label_comma())+
+  labs(x = "Harassment", 
+       y = "Unlicensed Moneylending",
+       title = "Unlicensed Money lending vs harassment"
+  ) 
+
+
+``` 
+
+The above graph traces Singapore's total unlicensed money lending and harassment over the last decade. At the start of 2011, money lending and harassment is at its peak at over 10,000 harassment and over 1,500 unlicensed money lending activities, the lowest point is in 2016 which has less than 2,500 harassment and less than 600 unlicensed money lending activities. After 2016, the numbers has been creeping back up and in 2019, almost reached the numbers of 2014.
+
+
+
+```{r warning = FALSE, message = FALSE, echo = FALSE}
+
+#Combine number of harassment and unlicensed moneylending in one dataframe
+data_mh4 <- aggregate(value~year+location, data_mh3, sum)
+
+
+p.5 <- ggplot(data = data_mh4,mapping = aes(x = year, y= value, fill = location))
+p.5 + geom_line(aes(color = location))+
+  scale_y_continuous(labels = scales::label_comma())+
+  scale_x_continuous(breaks = seq(2010,2020,2))+
+  geom_text_repel( data = subset(data_mh4, year == 2014),
+                   aes(label = location, color = location)) +
+  guides(color = "none")+
+  labs(y = "Total Harassment & Unlicensed Moneylending",
+       x = NULL,
+       title = "Total activities reported by Police Headquarters")
+
+``` 
+
+The above visualization looks at the number of cases reported to each of the 7 police division over the years. The headquarters in Jurong, Ang Mo Kio and Bedok always have a higher reported cases compared to Clementi, Central and Tanglin. As Woodlands police division officially opened only in March 2019, their reported activities only start to pick up at the later part of the decade.
+
+----------------------------
+
+## Question 2(c)
+
+# ```{r warning = FALSE, message = FALSE, echo= FALSE} 
+# library(ggmap)
+# register_google(key ='AIzaSyBv8h7Jyt29ofyvjTK0flwXRkD2iiayAWY' )
+# 
+# #Create dataframe of main police hq and their respective postal code manually
+# location <- c('Tanglin', 'Central', 'Woodlands', 'Clementi', 'Bedok', 'Jurong', 'Ang Mo Kio')
+# postal <- c('228892','088762','738622','129858','469676','649482','569784')
+# npc.postal <- data.frame(location, postal)
+# 
+# #Combines npc.postal data frame and obtain the lat and lon using geocode
+# data_mh5 <- left_join(data_mh4, npc.postal)
+# data_mh5 <- mutate_geocode(data_mh5, postal)
+# 
+# #As google API is not able to retrieve Geocode for Woodlands, lon and lat added manually
+# 
+# data_mh5$lon[data_mh5$location == "Woodlands"] <- 103.778834
+# data_mh5$lat[data_mh5$location == "Woodlands"] <- 1.433188
+# 
+# #Filter out the required data for plot
+# data_mh6 <- filter(data_mh5, year == 2011| year == 2020)
+# 
+# #Map Plot 
+# singapore <- geocode('Singapore')
+# map.3 <- get_map(location = c(singapore[["lon"]], singapore[["lat"]]), color = "bw", zoom = 11)
+# 
+# ggmap(map.3) + geom_point(data = data_mh6, aes(x = lon, y = lat), color = "yellow", size = 8)+
+#   geom_text(aes(x=lon, y=lat, label = value), data=data_mh6)+
+#   facet_wrap(~year)
+# 
+# 
+# 
+# ``` 
+
+The above spatial visualization compares the number of cases recorded in 2011 vs 2020. We can see through this ten years, singapore has made a significant progress in reducing harassment and unlicensed moneylending activities across all regions of Singapore. However, the number of cases for headquarters for the neighbourhoods are still higher compared to headquarters near the central region.
+
+-------------------------------------------------------------
+
+## Question 2(d)
+
+```{r, echo=FALSE, out.width="30%"}
+knitr::include_graphics("fdbeca01.png")
+``` 
+
+The above dashboard allows the user to see the number of harassment, unlicensed moneylending activities and total activities in a selected year they have chosen. It will also show a spatial visualization of the total number of activities reported in the different region of Singapore in the selected year. 
+
+---------------------------
+
+## Question 2(e)
+
+Unlicensed moneylending is when an unlicensed individual, usually a loan shark, lends money to another individual and uses unregulated harassment methods to chase outstanding debts. Victims of loanshark activities are usually low income earners with few savings and low credit score who are desperate and therefore, looks for unregulated sources of loans. Unlicensed moneylending is dangerous as some of their harassment methods are violent and often harmful and disruptive to the neighborhood and communities.  
+
+From the first visualisation of Q2b, we can that the government and enforcement efforts has been successful in reducing the number of unlicensed moneylending and harassment activities significantly since 2011. We see an outlier in 2020 where harassment remain low while unlicensed moneylending shot up. The cause of unlicensed moneylending increase might be due to the financial impact caused by the Covid-19 pandemic that make those who are unable to obtain sufficient loans from licensed lenders, like banks, to look towards unlicensed moneylending. Based on past trend, a rise in unlicensed moneylending should also result in a rise to harassment activities, however, the reverse happens instead. This might be due to the increase enforcement due to social distancing and lockdown which restrict movement and increases the risk of loanshark's runners getting caught and apprehended if they went to harass the borrower's household.  
+
+Zooming in to the 7 police division headquarters in the second visualisation, we can observe that total cases reported can be split into 2 distinct groups. Headquarters taking care of neighbourhoods at the heartlands like Woodlands, Ang Mo Kio, Bedok and Jurong has a higher number of activities reported compared to the headquarters located in areas like Central, Tanglin and Clementi which has lower number of activities reported. The reduction in cases throughout the years are also consistent across all headquarters as there are no areas that outperformed or underperformed significantly throughout the decade which might suggest that measures and efforts to curb such activities are carried out evenly across Singapore and talent and manpower is evenly distributed in order to achieve similar result.  
+
+Looking at the spatial visualization that compares the exact number of cases between 2011 and 2020 in Q2c, we can see that the numbers has dropped significantly in 10 years from four- figures in most of the headquarters in 2011 to just three-figures in 2020. The choice of opening the 7th headquarters in the north of Singapore, Woodlands, is also a good move by the government as it helped to split the reported cases between Jurong and Ang Mo Kio, balancing the workload and not allowing any one location to be overloaded.  
+
+Overall, the above visualization shows that the effort by the Singapore government and police force to reduce and curb unlicensed money lending and harassment activities has been successful and were able to drastically reduce these activities throughout the years. This achievement can be attributed to effective policies to assist families who requires financial aid, public education and strong enforcement actions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
